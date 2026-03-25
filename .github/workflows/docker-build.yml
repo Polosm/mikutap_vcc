@@ -1,1 +1,47 @@
+name: Build and Push Docker Image
 
+# 触发条件：只要代码推送到 main 分支，就自动触发构建
+on:
+  push:
+    branches: 
+      - main
+      # 注意：如果你的 GitHub 默认主分支叫 master，请把上面的 main 改成 master
+
+# 环境变量：使用 GitHub 官方的容器镜像仓库 (GHCR)
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    
+    # 权限设置：允许 GitHub Actions 替你读取代码并写入镜像包
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }} # GitHub 会自动提供这个临时密钥，你什么都不用管
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
