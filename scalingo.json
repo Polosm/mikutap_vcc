@@ -1,5 +1,0 @@
-{
-  "build": {
-    "buildpack": "https://github.com/Scalingo/buildpack-docker"
-  }
-}
