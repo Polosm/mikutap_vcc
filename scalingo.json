@@ -1,7 +1,0 @@
-{
-  "build": {
-    "buildpacks": [
-      "https://github.com/Scalingo/nodejs-buildpack.git"
-    ]
-  }
-}
